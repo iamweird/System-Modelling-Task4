@@ -19,6 +19,8 @@
 
 using namespace std;
 
+typedef queue<request>::container_type::iterator qrit;
+
 void request_main();
 void request_in();
 void request_start();
@@ -120,11 +122,44 @@ void request_main() {
 
 double get_expected_residence_time(queue<request> &q) {
 	double time = 0.;
-	for (queue<request>::container_type::iterator i=q.c.begin(); i != q.c.end(); i++) {
-		time += i->end - i->in;
+	int i = 0;
+	for (qrit it=q.c.begin(); it != q.c.end() && i < TESTS; it++, i++) {
+		time += it->end - it->in;
 	}
 	time /= q.size();
 	return time;
+}
+
+double get_expected_requests_number(queue<request> &q) {
+	int *req_num = new int[TESTS+1];
+	memset(req_num, 0, sizeof(int)*(TESTS+1));
+
+	/*
+	int i = 0;
+	for (qrit it=q.c.begin(); it != q.c.end() && i < TESTS; it++, i++) {
+		int reqs = 1;
+		for (qrit jt=it; jt != q.c.end() && jt->in < it->end; jt++, reqs++);
+	}
+	*/
+
+	double step = (q.back().in - q.front().in) / TESTS;
+	printf("Step: %.6lf\n", step);
+	for (double t=q.front().in; t < q.back().in; t+=step) {
+		qrit it;
+		for (it=q.c.begin(); it != q.c.end() && it->end <= t; it++);
+		int reqs = 1;
+		for (; it != q.c.end() && it->in <= t && it->end > t; it++, reqs++);
+		req_num[reqs]++;
+	}
+
+	for (int i=0; i<TESTS+1; i++) {
+		if (req_num[i]) {
+			printf("%6.d: %6.d\n", i, req_num[i]);
+		}
+	}
+
+	delete []req_num;
+	return 0.;
 }
 
 void read_input() {
@@ -147,6 +182,10 @@ int main(int argc, char * argv[]) {
 
 	request_main();
 
+	printf("Expected residence time is %.3lf\n", get_expected_residence_time(q_out));
+
+	get_expected_requests_number(q_out);
+
 	while (!q_out.empty()) {
 		printf("%5.6lf %5.6lf %5.6lf\n",
 				q_out.front().in,
@@ -154,8 +193,6 @@ int main(int argc, char * argv[]) {
 				q_out.front().end);
 		q_out.pop();
 	}
-
-	printf("Expected residence time is %lf\n", get_expected_residence_time(q_out));
 
 	_getch();
 	return 0;
