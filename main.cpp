@@ -5,8 +5,6 @@
  *      Author: sparxxx
  */
 
-#pragma comment(linker, "/stack:67108864")
-
 #include <iostream>
 #include <queue>
 #include <set>
@@ -120,6 +118,15 @@ void request_main() {
 	}
 }
 
+double get_expected_residence_time(queue<request> &q) {
+	double time = 0.;
+	for (queue<request>::container_type::iterator i=q.c.begin(); i != q.c.end(); i++) {
+		time += i->end - i->in;
+	}
+	time /= q.size();
+	return time;
+}
+
 void read_input() {
 	printf("Enter lambda1 and lambda2 parameters: ");
 	scanf("%lf %lf", &L1, &L2);
@@ -128,6 +135,8 @@ void read_input() {
 }
 
 int main(int argc, char * argv[]) {
+	random_init();
+
 	read_input();
 
 	Event evt;
@@ -145,6 +154,8 @@ int main(int argc, char * argv[]) {
 				q_out.front().end);
 		q_out.pop();
 	}
+
+	printf("Expected residence time is %lf\n", get_expected_residence_time(q_out));
 
 	_getch();
 	return 0;
