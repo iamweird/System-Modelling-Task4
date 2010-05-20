@@ -134,14 +134,6 @@ double get_expected_requests_number(queue<request> &q) {
 	int *req_num = new int[TESTS+1];
 	memset(req_num, 0, sizeof(int)*(TESTS+1));
 
-	/*
-	int i = 0;
-	for (qrit it=q.c.begin(); it != q.c.end() && i < TESTS; it++, i++) {
-		int reqs = 1;
-		for (qrit jt=it; jt != q.c.end() && jt->in < it->end; jt++, reqs++);
-	}
-	*/
-
 	double step = (q.back().in - q.front().in) / TESTS;
 	printf("Step: %.6lf\n", step);
 	for (double t=q.front().in; t < q.back().in; t+=step) {
@@ -158,8 +150,15 @@ double get_expected_requests_number(queue<request> &q) {
 		}
 	}
 
+	double expected_req_num = 0.;
+	for (int i=0; i<TESTS+1; i++) {
+		if (req_num[i]) {
+			expected_req_num += i * (((double) req_num[i]) / TESTS);
+		}
+	}
+
 	delete []req_num;
-	return 0.;
+	return expected_req_num;
 }
 
 void read_input() {
@@ -184,7 +183,7 @@ int main(int argc, char * argv[]) {
 
 	printf("Expected residence time is %.3lf\n", get_expected_residence_time(q_out));
 
-	get_expected_requests_number(q_out);
+	printf("Expected requests number is %.3lf\n", get_expected_requests_number(q_out));
 
 	while (!q_out.empty()) {
 		printf("%5.6lf %5.6lf %5.6lf\n",
