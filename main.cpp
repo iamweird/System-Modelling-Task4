@@ -135,7 +135,9 @@ double get_expected_requests_number(queue<request> &q) {
 	memset(req_num, 0, sizeof(int)*(TESTS+1));
 
 	double step = (q.back().in - q.front().in) / TESTS;
+#ifdef _DEBUG
 	printf("Step: %.6lf\n", step);
+#endif
 	for (double t=q.front().in; t < q.back().in; t+=step) {
 		qrit it;
 		for (it=q.c.begin(); it != q.c.end() && it->end <= t; it++);
@@ -144,11 +146,13 @@ double get_expected_requests_number(queue<request> &q) {
 		req_num[reqs]++;
 	}
 
+#ifdef _DEBUG
 	for (int i=0; i<TESTS+1; i++) {
 		if (req_num[i]) {
 			printf("%6.d: %6.d\n", i, req_num[i]);
 		}
 	}
+#endif
 
 	double expected_req_num = 0.;
 	for (int i=0; i<TESTS+1; i++) {
@@ -185,6 +189,7 @@ int main(int argc, char * argv[]) {
 
 	printf("Expected requests number is %.3lf\n", get_expected_requests_number(q_out));
 
+#ifdef _DEBUG
 	while (!q_out.empty()) {
 		printf("%5.6lf %5.6lf %5.6lf\n",
 				q_out.front().in,
@@ -192,7 +197,10 @@ int main(int argc, char * argv[]) {
 				q_out.front().end);
 		q_out.pop();
 	}
+#endif
 
+#ifndef _DEBUG
 	_getch();
+#endif
 	return 0;
 }
